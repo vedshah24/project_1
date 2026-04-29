@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>United Scouting Dashboard</title>
+    <style>
+        :root {
+            --man-utd-red: #DA291C;
+            --bg-dark: #0b0b0b;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .player-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            transition: transform 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--man-utd-red);
+        }
+
+        .badge {
+            background: var(--man-utd-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            margin: 15px 0 5px 0;
+            font-size: 24px;
+        }
+
+        p.position {
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .stat-box .label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .stat-box .value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .btn-update {
+            margin-top: 25px;
+            background: transparent;
+            border: 1px solid var(--man-utd-red);
+            color: var(--man-utd-red);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-update:hover {
+            background: var(--man-utd-red);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-card">
+        <span class="badge">MUFC Elite</span>
+        <h1>Bruno Fernandes</h1>
+        <p class="position">Midfielder | Captain</p>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="label">Goals</span>
+                <span class="value">10</span>
+            </div>
+            <div class="stat-box">
+                <span class="label">Assists</span>
+                <span class="value">15</span>
+            </div>
+        </div>
+
+        <button class="btn-update" onclick="alert('Logic Connection Coming Soon!')">
+            Refresh Performance Rating
+        </button>
+    </div>
+
+</body>
+</html>
