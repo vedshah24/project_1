@@ -112,11 +112,11 @@
         <div class="stats-grid">
             <div class="stat-box">
                 <span class="label">Goals</span>
-                <span class="value">10</span>
+                <span class="value" id="goals-value">-</span>
             </div>
             <div class="stat-box">
                 <span class="label">Assists</span>
-                <span class="value">15</span>
+                <span class="value" id="assists-value">-</span>
             </div>
         </div>
 
@@ -125,5 +125,34 @@
         </button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = "https://zgpeqrawhlbsdobxufoj.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpncGVxcmF3aGxic2RvYnh1Zm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTgzMDgsImV4cCI6MjA5MzI5NDMwOH0.0UHyuz-GPoieQUgGaHgo2oQmvY_KIGI34Boqj9l2p28";
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        async function loadBrunoStats() {
+            const goalsEl = document.getElementById("goals-value");
+            const assistsEl = document.getElementById("assists-value");
+
+            const { data, error } = await supabaseClient
+                .from("players")
+                .select("goals, assists")
+                .eq("name", "Bruno Fernandes")
+                .single();
+
+            if (error) {
+                console.error("Failed to fetch Bruno Fernandes stats:", error);
+                goalsEl.textContent = "N/A";
+                assistsEl.textContent = "N/A";
+                return;
+            }
+
+            goalsEl.textContent = data.goals ?? "0";
+            assistsEl.textContent = data.assists ?? "0";
+        }
+
+        window.addEventListener("DOMContentLoaded", loadBrunoStats);
+    </script>
 </body>
 </html>
