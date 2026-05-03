@@ -107,6 +107,12 @@
             padding: 2rem;
             width: 100%;
             position: relative;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid #333;
@@ -124,19 +130,16 @@
             line-height: 1;
             color: var(--man-utd-red);
             letter-spacing: 0.08em;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.25rem;
             font-variant-numeric: tabular-nums;
         }
 
-        .badge {
-            background: var(--man-utd-red);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+        .player-position {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .rating-badge {
@@ -153,31 +156,22 @@
             letter-spacing: 0.03em;
         }
 
+        .rating-badge.silver {
+            background: #c0c0c0;
+            color: #1a1a1a;
+            border-color: #b2b2b2;
+        }
+
+        .rating-badge.gold {
+            background: #d4af37;
+            color: #1a1a1a;
+            border-color: #c29b2b;
+        }
+
         .player-name {
-            margin: 15px 0 5px 0;
+            margin: 0.15rem 0;
             font-size: 1.25rem;
             font-weight: 700;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-
-        .stat-box .label {
-            display: block;
-            font-size: 11px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-        }
-
-        .stat-box .value {
-            font-size: 18px;
-            font-weight: bold;
         }
 
         .grid-message {
@@ -236,46 +230,26 @@
             const ratingBadge = document.createElement("span");
             ratingBadge.className = "rating-badge";
             ratingBadge.textContent = "Rating " + (player.rating ?? 0);
+            if (player.rating >= 100) {
+                ratingBadge.classList.add("gold");
+            } else if (player.rating >= 50) {
+                ratingBadge.classList.add("silver");
+            }
 
             const abbr = document.createElement("div");
             abbr.className = "position-abbr";
             abbr.textContent = positionAbbreviation(player.position);
             abbr.setAttribute("aria-label", "Position " + (player.position ?? ""));
 
-            const badge = document.createElement("span");
-            badge.className = "badge";
-            badge.textContent = "MUFC Elite";
-
             const nameEl = document.createElement("h2");
             nameEl.className = "player-name";
             nameEl.textContent = player.name ?? "Unknown";
 
-            const statsGrid = document.createElement("div");
-            statsGrid.className = "stats-grid";
+            const positionText = document.createElement("p");
+            positionText.className = "player-position";
+            positionText.textContent = player.position ?? "Unknown Position";
 
-            const goalsBox = document.createElement("div");
-            goalsBox.className = "stat-box";
-            goalsBox.innerHTML =
-                '<span class="label">Goals</span><span class="value">' +
-                (player.goals ?? "0") +
-                "</span>";
-
-            const assistsBox = document.createElement("div");
-            assistsBox.className = "stat-box";
-            assistsBox.innerHTML =
-                '<span class="label">Assists</span><span class="value">' +
-                (player.assists ?? "0") +
-                "</span>";
-
-            const appearancesBox = document.createElement("div");
-            appearancesBox.className = "stat-box";
-            appearancesBox.innerHTML =
-                '<span class="label">Appearances</span><span class="value">' +
-                (player.appearance ?? "0") +
-                "</span>";
-
-            statsGrid.append(goalsBox, assistsBox, appearancesBox);
-            card.append(ratingBadge, abbr, badge, nameEl, statsGrid);
+            card.append(ratingBadge, abbr, nameEl, positionText);
             return card;
         }
 
