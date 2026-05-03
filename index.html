@@ -201,8 +201,8 @@
         const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpncGVxcmF3aGxic2RvYnh1Zm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTgzMDgsImV4cCI6MjA5MzI5NDMwOH0.0UHyuz-GPoieQUgGaHgo2oQmvY_KIGI34Boqj9l2p28";
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         const filters = ["ALL", "ST", "MD", "CB", "RB"];
+        let allPlayers = [];
         const state = {
-            players: [],
             positionFilter: "ALL",
             sortBy: "goals-desc"
         };
@@ -271,16 +271,16 @@
             return sorted;
         }
 
-        function getVisiblePlayers() {
+        function getVisiblePlayers(players) {
             const filtered = state.positionFilter === "ALL"
-                ? [...state.players]
-                : state.players.filter((player) => positionAbbreviation(player.position) === state.positionFilter);
+                ? [...players]
+                : players.filter((player) => positionAbbreviation(player.position) === state.positionFilter);
             return sortPlayers(filtered, state.sortBy);
         }
 
-        function renderPlayers() {
+        function displayPlayers(players) {
             const grid = document.getElementById("squad-grid");
-            const visiblePlayers = getVisiblePlayers();
+            const visiblePlayers = getVisiblePlayers(players);
             grid.innerHTML = "";
 
             if (visiblePlayers.length === 0) {
@@ -310,22 +310,22 @@
                 for (const el of filterGroup.querySelectorAll(".filter-btn")) {
                     el.classList.toggle("active", el === btn);
                 }
-                renderPlayers();
+                displayPlayers(allPlayers);
             });
 
             sortBySelect.addEventListener("change", (event) => {
                 state.sortBy = event.target.value;
-                renderPlayers();
+                displayPlayers(allPlayers);
             });
         }
 
-        async function loadSquad() {
+        async function fetchPlayers() {
             const grid = document.getElementById("squad-grid");
             grid.innerHTML = '<p class="grid-message">Loading squad…</p>';
 
             const { data, error } = await supabaseClient
                 .from("players")
-                .select("name, position, goals, assists, appearances");
+                .select("*");
             console.log("Fetched data:", data);
 
             if (error) {
@@ -340,13 +340,13 @@
                 return;
             }
 
-            state.players = data;
-            renderPlayers();
+            allPlayers = data;
+            displayPlayers(allPlayers);
         }
 
         window.addEventListener("DOMContentLoaded", () => {
             bindControls();
-            loadSquad();
+            fetchPlayers();
         });
     </script>
 </body>
