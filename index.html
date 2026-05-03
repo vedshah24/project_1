@@ -311,6 +311,7 @@
         function displayPlayers(players) {
             const grid = document.getElementById("squad-grid");
             const playersWithScore = players.map((player) => {
+                console.log("Player Stats:", player.name, player.appearances, player.clean_sheets);
                 const goals = Number(player.goals || 0);
                 const assists = Number(player.assists || 0);
                 const apps = Number(player.appearances || 0);
