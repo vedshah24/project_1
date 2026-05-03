@@ -271,7 +271,7 @@
             appearancesBox.className = "stat-box";
             appearancesBox.innerHTML =
                 '<span class="label">Appearances</span><span class="value">' +
-                (player.appearances ?? "0") +
+                (player.appearance ?? "0") +
                 "</span>";
 
             statsGrid.append(goalsBox, assistsBox, appearancesBox);
@@ -294,7 +294,7 @@
                     return toNumber(b.assists) - toNumber(a.assists);
                 }
                 if (sortBy === "appearances-desc") {
-                    return toNumber(b.appearances) - toNumber(a.appearances);
+                    return toNumber(b.appearance) - toNumber(a.appearance);
                 }
                 return toNumber(b.goals) - toNumber(a.goals);
             });
@@ -311,12 +311,8 @@
         function displayPlayers(players) {
             const grid = document.getElementById("squad-grid");
             const playersWithScore = players.map((player) => {
-                console.log("Player Stats:", player.name, player.appearances, player.clean_sheets);
-                const goals = Number(player.goals || 0);
-                const assists = Number(player.assists || 0);
-                const apps = Number(player.appearances || 0);
-                const cs = Number(player.clean_sheets || 0);
-                const rating = (goals * 5) + (assists * 3) + (cs * 4) + (apps * 1);
+                console.log("Player Stats:", player.name, player.appearance, player.clean_sheets);
+                const rating = (Number(player.goals || 0) * 5) + (Number(player.assists || 0) * 3) + (Number(player.clean_sheets || 0) * 4) + (Number(player.appearance || 0) * 1);
                 return {
                     ...player,
                     rating
