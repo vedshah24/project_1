@@ -146,7 +146,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 15px;
             margin-top: 20px;
             border-top: 1px solid #333;
@@ -247,7 +247,14 @@
                 (player.assists ?? "0") +
                 "</span>";
 
-            statsGrid.append(goalsBox, assistsBox);
+            const appearancesBox = document.createElement("div");
+            appearancesBox.className = "stat-box";
+            appearancesBox.innerHTML =
+                '<span class="label">Appearances</span><span class="value">' +
+                (player.appearances ?? "0") +
+                "</span>";
+
+            statsGrid.append(goalsBox, assistsBox, appearancesBox);
             card.append(abbr, badge, nameEl, statsGrid);
             return card;
         }
