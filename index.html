@@ -235,7 +235,7 @@
 
             const ratingBadge = document.createElement("span");
             ratingBadge.className = "rating-badge";
-            ratingBadge.textContent = "Rating " + (player.performanceScore ?? 0);
+            ratingBadge.textContent = "Rating " + (player.rating ?? 0);
 
             const abbr = document.createElement("div");
             abbr.className = "position-abbr";
@@ -284,19 +284,11 @@
             return Number.isFinite(n) ? n : 0;
         }
 
-        function calculatePerformanceScore(player) {
-            const goals = toNumber(player.goals);
-            const assists = toNumber(player.assists);
-            const cleanSheets = toNumber(player.clean_sheets);
-            const appearances = toNumber(player.appearances);
-            return (goals * 5) + (assists * 3) + (cleanSheets * 4) + (appearances * 1);
-        }
-
         function sortPlayers(players, sortBy) {
             const sorted = [...players];
             sorted.sort((a, b) => {
                 if (sortBy === "rating-desc") {
-                    return toNumber(b.performanceScore) - toNumber(a.performanceScore);
+                    return toNumber(b.rating) - toNumber(a.rating);
                 }
                 if (sortBy === "assists-desc") {
                     return toNumber(b.assists) - toNumber(a.assists);
@@ -318,10 +310,17 @@
 
         function displayPlayers(players) {
             const grid = document.getElementById("squad-grid");
-            const playersWithScore = players.map((player) => ({
-                ...player,
-                performanceScore: calculatePerformanceScore(player)
-            }));
+            const playersWithScore = players.map((player) => {
+                const goals = Number(player.goals || 0);
+                const assists = Number(player.assists || 0);
+                const apps = Number(player.appearances || 0);
+                const cs = Number(player.clean_sheets || 0);
+                const rating = (goals * 5) + (assists * 3) + (cs * 4) + (apps * 1);
+                return {
+                    ...player,
+                    rating
+                };
+            });
             const visiblePlayers = getVisiblePlayers(playersWithScore);
             grid.innerHTML = "";
 
