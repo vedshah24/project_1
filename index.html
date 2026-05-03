@@ -32,6 +32,69 @@
             font-weight: 700;
         }
 
+        .control-center {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            background: #111;
+            color: var(--text-main);
+            border: 1px solid #333;
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--man-utd-red);
+        }
+
+        .filter-btn.active {
+            background: var(--man-utd-red);
+            border-color: var(--man-utd-red);
+        }
+
+        .sort-group {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .sort-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        #sort-by {
+            background: #111;
+            color: var(--text-main);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
         #squad-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -113,6 +176,23 @@
 <body>
 
     <h1 class="page-title">United Scouting Dashboard</h1>
+    <section class="control-center" aria-label="Squad controls">
+        <div class="filter-group" id="position-filters" role="group" aria-label="Filter by position">
+            <button type="button" class="filter-btn active" data-position="ALL">ALL</button>
+            <button type="button" class="filter-btn" data-position="ST">ST</button>
+            <button type="button" class="filter-btn" data-position="MD">MD</button>
+            <button type="button" class="filter-btn" data-position="CB">CB</button>
+            <button type="button" class="filter-btn" data-position="RB">RB</button>
+        </div>
+        <div class="sort-group">
+            <label class="sort-label" for="sort-by">Sort By</label>
+            <select id="sort-by">
+                <option value="goals-desc">Goals (High to Low)</option>
+                <option value="assists-desc">Assists (High to Low)</option>
+                <option value="appearances-desc">Appearances</option>
+            </select>
+        </div>
+    </section>
     <div id="squad-grid" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -120,6 +200,12 @@
         const supabaseUrl = "https://zgpeqrawhlbsdobxufoj.supabase.co";
         const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpncGVxcmF3aGxic2RvYnh1Zm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTgzMDgsImV4cCI6MjA5MzI5NDMwOH0.0UHyuz-GPoieQUgGaHgo2oQmvY_KIGI34Boqj9l2p28";
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const filters = ["ALL", "ST", "MD", "CB", "RB"];
+        const state = {
+            players: [],
+            positionFilter: "ALL",
+            sortBy: "goals-desc"
+        };
 
         function positionAbbreviation(position) {
             if (position == null || String(position).trim() === "") return "—";
@@ -166,13 +252,80 @@
             return card;
         }
 
+        function toNumber(value) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function sortPlayers(players, sortBy) {
+            const sorted = [...players];
+            sorted.sort((a, b) => {
+                if (sortBy === "assists-desc") {
+                    return toNumber(b.assists) - toNumber(a.assists);
+                }
+                if (sortBy === "appearances-desc") {
+                    return toNumber(b.appearances) - toNumber(a.appearances);
+                }
+                return toNumber(b.goals) - toNumber(a.goals);
+            });
+            return sorted;
+        }
+
+        function getVisiblePlayers() {
+            const filtered = state.positionFilter === "ALL"
+                ? [...state.players]
+                : state.players.filter((player) => positionAbbreviation(player.position) === state.positionFilter);
+            return sortPlayers(filtered, state.sortBy);
+        }
+
+        function renderPlayers() {
+            const grid = document.getElementById("squad-grid");
+            const visiblePlayers = getVisiblePlayers();
+            grid.innerHTML = "";
+
+            if (visiblePlayers.length === 0) {
+                grid.innerHTML = '<p class="grid-message">No players match this filter.</p>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            for (const player of visiblePlayers) {
+                fragment.appendChild(createPlayerCard(player));
+            }
+            grid.appendChild(fragment);
+        }
+
+        function bindControls() {
+            const filterGroup = document.getElementById("position-filters");
+            const sortBySelect = document.getElementById("sort-by");
+
+            filterGroup.addEventListener("click", (event) => {
+                const btn = event.target.closest(".filter-btn");
+                if (!btn) return;
+
+                const nextFilter = btn.dataset.position;
+                if (!filters.includes(nextFilter)) return;
+                state.positionFilter = nextFilter;
+
+                for (const el of filterGroup.querySelectorAll(".filter-btn")) {
+                    el.classList.toggle("active", el === btn);
+                }
+                renderPlayers();
+            });
+
+            sortBySelect.addEventListener("change", (event) => {
+                state.sortBy = event.target.value;
+                renderPlayers();
+            });
+        }
+
         async function loadSquad() {
             const grid = document.getElementById("squad-grid");
             grid.innerHTML = '<p class="grid-message">Loading squad…</p>';
 
             const { data: players, error } = await supabaseClient
                 .from("players")
-                .select("name, position, goals, assists")
+                .select("name, position, goals, assists, appearances")
                 .order("name");
 
             if (error) {
@@ -182,21 +335,19 @@
                 return;
             }
 
-            grid.innerHTML = "";
-
             if (!players || players.length === 0) {
                 grid.innerHTML = '<p class="grid-message">No players in the database.</p>';
                 return;
             }
 
-            const fragment = document.createDocumentFragment();
-            for (const player of players) {
-                fragment.appendChild(createPlayerCard(player));
-            }
-            grid.appendChild(fragment);
+            state.players = players;
+            renderPlayers();
         }
 
-        window.addEventListener("DOMContentLoaded", loadSquad);
+        window.addEventListener("DOMContentLoaded", () => {
+            bindControls();
+            loadSquad();
+        });
     </script>
 </body>
 </html>
