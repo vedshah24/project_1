@@ -106,6 +106,7 @@
             border-radius: 16px;
             padding: 2rem;
             width: 100%;
+            position: relative;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid #333;
@@ -136,6 +137,20 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .rating-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #111;
+            border: 1px solid #444;
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 0.3rem 0.6rem;
+            letter-spacing: 0.03em;
         }
 
         .player-name {
@@ -187,6 +202,7 @@
         <div class="sort-group">
             <label class="sort-label" for="sort-by">Sort By</label>
             <select id="sort-by">
+                <option value="rating-desc">Highest Rating</option>
                 <option value="goals-desc">Goals (High to Low)</option>
                 <option value="assists-desc">Assists (High to Low)</option>
                 <option value="appearances-desc">Appearances</option>
@@ -204,7 +220,7 @@
         let allPlayers = [];
         const state = {
             positionFilter: "ALL",
-            sortBy: "goals-desc"
+            sortBy: "rating-desc"
         };
 
         function positionAbbreviation(position) {
@@ -216,6 +232,10 @@
         function createPlayerCard(player) {
             const card = document.createElement("article");
             card.className = "player-card";
+
+            const ratingBadge = document.createElement("span");
+            ratingBadge.className = "rating-badge";
+            ratingBadge.textContent = "Rating " + (player.performanceScore ?? 0);
 
             const abbr = document.createElement("div");
             abbr.className = "position-abbr";
@@ -255,7 +275,7 @@
                 "</span>";
 
             statsGrid.append(goalsBox, assistsBox, appearancesBox);
-            card.append(abbr, badge, nameEl, statsGrid);
+            card.append(ratingBadge, abbr, badge, nameEl, statsGrid);
             return card;
         }
 
@@ -264,9 +284,20 @@
             return Number.isFinite(n) ? n : 0;
         }
 
+        function calculatePerformanceScore(player) {
+            const goals = toNumber(player.goals);
+            const assists = toNumber(player.assists);
+            const cleanSheets = toNumber(player.clean_sheets);
+            const appearances = toNumber(player.appearances);
+            return (goals * 5) + (assists * 3) + (cleanSheets * 4) + (appearances * 1);
+        }
+
         function sortPlayers(players, sortBy) {
             const sorted = [...players];
             sorted.sort((a, b) => {
+                if (sortBy === "rating-desc") {
+                    return toNumber(b.performanceScore) - toNumber(a.performanceScore);
+                }
                 if (sortBy === "assists-desc") {
                     return toNumber(b.assists) - toNumber(a.assists);
                 }
@@ -287,7 +318,11 @@
 
         function displayPlayers(players) {
             const grid = document.getElementById("squad-grid");
-            const visiblePlayers = getVisiblePlayers(players);
+            const playersWithScore = players.map((player) => ({
+                ...player,
+                performanceScore: calculatePerformanceScore(player)
+            }));
+            const visiblePlayers = getVisiblePlayers(playersWithScore);
             grid.innerHTML = "";
 
             if (visiblePlayers.length === 0) {
