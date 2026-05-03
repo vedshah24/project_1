@@ -324,32 +324,32 @@
     <div id="squad-grid" aria-live="polite"></div>
 
     <div id="player-modal" aria-hidden="true">
-        <div class="modal-backdrop"></div>
+        <div class="modal-backdrop" id="modal-backdrop"></div>
         <section class="modal-container" role="dialog" aria-modal="true" aria-label="Player details">
-            <button class="modal-close" type="button" aria-label="Close player details">X</button>
+            <button class="modal-close" id="modal-close-btn" type="button" aria-label="Close player details">X</button>
             <header class="modal-header">
-                <h2 class="modal-player-name">Player Name</h2>
-                <p class="modal-meta">Position: <span>Position</span></p>
-                <span class="modal-rating">Rating: 0</span>
+                <h2 class="modal-player-name" id="modal-player-name">Player Name</h2>
+                <p class="modal-meta">Position: <span id="modal-player-position">Position</span></p>
+                <span class="modal-rating" id="modal-player-rating">Rating: 0</span>
             </header>
             <section>
                 <h3 class="modal-section-title">Stats Breakdown</h3>
                 <div class="modal-stats-grid">
                     <div class="modal-stat">
                         <span class="modal-stat-label">Goals</span>
-                        <span class="modal-stat-value">0</span>
+                        <span class="modal-stat-value" id="modal-player-goals">0</span>
                     </div>
                     <div class="modal-stat">
                         <span class="modal-stat-label">Assists</span>
-                        <span class="modal-stat-value">0</span>
+                        <span class="modal-stat-value" id="modal-player-assists">0</span>
                     </div>
                     <div class="modal-stat">
                         <span class="modal-stat-label">Appearance</span>
-                        <span class="modal-stat-value">0</span>
+                        <span class="modal-stat-value" id="modal-player-appearance">0</span>
                     </div>
                     <div class="modal-stat">
                         <span class="modal-stat-label">Clean Sheets</span>
-                        <span class="modal-stat-value">0</span>
+                        <span class="modal-stat-value" id="modal-player-clean-sheets">0</span>
                     </div>
                 </div>
             </section>
@@ -453,9 +453,30 @@
 
             const fragment = document.createDocumentFragment();
             for (const player of visiblePlayers) {
-                fragment.appendChild(createPlayerCard(player));
+                const card = createPlayerCard(player);
+                card.addEventListener("click", () => {
+                    openPlayerModal(player);
+                });
+                fragment.appendChild(card);
             }
             grid.appendChild(fragment);
+        }
+
+        function openPlayerModal(player) {
+            document.getElementById("modal-player-name").textContent = player.name ?? "Unknown";
+            document.getElementById("modal-player-position").textContent = player.position ?? "Unknown Position";
+            document.getElementById("modal-player-rating").textContent = "Rating: " + (player.rating ?? 0);
+            document.getElementById("modal-player-goals").textContent = String(player.goals ?? 0);
+            document.getElementById("modal-player-assists").textContent = String(player.assists ?? 0);
+            document.getElementById("modal-player-appearance").textContent = String(player.appearance ?? 0);
+            document.getElementById("modal-player-clean-sheets").textContent = String(player.clean_sheets ?? 0);
+            document.body.classList.add("modal-active");
+            document.getElementById("player-modal").setAttribute("aria-hidden", "false");
+        }
+
+        function closePlayerModal() {
+            document.body.classList.remove("modal-active");
+            document.getElementById("player-modal").setAttribute("aria-hidden", "true");
         }
 
         function bindControls() {
@@ -480,6 +501,11 @@
                 state.sortBy = event.target.value;
                 displayPlayers(allPlayers);
             });
+        }
+
+        function bindModalEvents() {
+            document.getElementById("modal-close-btn").addEventListener("click", closePlayerModal);
+            document.getElementById("modal-backdrop").addEventListener("click", closePlayerModal);
         }
 
         async function fetchPlayers() {
@@ -509,6 +535,7 @@
 
         window.addEventListener("DOMContentLoaded", () => {
             bindControls();
+            bindModalEvents();
             fetchPlayers();
         });
     </script>
