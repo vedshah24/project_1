@@ -323,10 +323,10 @@
             const grid = document.getElementById("squad-grid");
             grid.innerHTML = '<p class="grid-message">Loading squad…</p>';
 
-            const { data: players, error } = await supabaseClient
+            const { data, error } = await supabaseClient
                 .from("players")
-                .select("name, position, goals, assists, appearances")
-                .order("name");
+                .select("name, position, goals, assists, appearances");
+            console.log("Fetched data:", data);
 
             if (error) {
                 console.error("Failed to fetch players:", error);
@@ -335,12 +335,12 @@
                 return;
             }
 
-            if (!players || players.length === 0) {
+            if (!data || data.length === 0) {
                 grid.innerHTML = '<p class="grid-message">No players in the database.</p>';
                 return;
             }
 
-            state.players = players;
+            state.players = data;
             renderPlayers();
         }
 
